@@ -3,21 +3,33 @@ package org.z390.test
 import org.junit.jupiter.api.Test
 
 class TestZ390Test extends z390Test {
-    /*
-    This class tests the functionality of the Z390 test class
-     */
 
     var sysmac = pathJoin(this.project_root, "mac")
     var options = ['trace', 'noloadhigh', "SYSMAC(${sysmac})"]
 
     @Test
-    void test_file_source() {
+    void testAsm() {
         int rc = this.asm(pathJoin("tests", "TESTINS1"), *options)
         this.printOutput()
         assert rc == 0
     }
+
     @Test
-    void test_inline_source() {
+    void testAsml() {
+        int rc = this.asml(pathJoin("tests", "TESTINS2"), *options)
+        this.printOutput()
+        assert rc == 0
+    }
+
+    @Test
+    void testAsmlg() {
+        int rc = this.asmlg(pathJoin("tests", "TESTINS2"), *options)
+        this.printOutput()
+        assert rc == 0
+    }
+
+    @Test
+    void testInlineSource() {
 
         var source = """TESTB    START 0
          USING *,13
@@ -31,7 +43,8 @@ class TestZ390Test extends z390Test {
     """
         int rc = this.asm("INLINE", asm_source: source, *options)
         this.printOutput()
-        assert rc == 12
+        assert rc == 12   // Check return code
+        assert this.fileOutput['ERR'] =~ /AZ390 AZ390I invalid relatvie offset expression/  // check error present
     }
 }
 
