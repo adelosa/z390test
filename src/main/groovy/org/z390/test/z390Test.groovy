@@ -39,7 +39,7 @@ class z390Test {
         }
     }
 
-    def mz390(String asmFileExcludingExtension, String... args) {
+    def callMz390(String asmFileExcludingExtension, String... args) {
         println("Executing mz390: ${asmFileExcludingExtension}")
         var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
                    '-Xrs', '-Xms150000K', '-Xmx150000K', 'mz390', asmFileExcludingExtension, *args].join(" ")
@@ -54,7 +54,7 @@ class z390Test {
         return proc.exitValue()
     }
 
-    def lz390(String asmFileExcludingExtension, String... args) {
+    def callLz390(String asmFileExcludingExtension, String... args) {
         println("Executing lz390: ${asmFileExcludingExtension}")
         var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
                    '-Xrs', 'lz390', asmFileExcludingExtension, *args].join(" ")
@@ -69,7 +69,7 @@ class z390Test {
         return proc.exitValue()
     }
 
-    def ez390(String asmFileExcludingExtension, String... args) {
+    def callEz390(String asmFileExcludingExtension, String... args) {
         println("Executing ez390: ${asmFileExcludingExtension}")
         var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
                    '-Xrs', 'ez390', asmFileExcludingExtension, *args].join(" ")
@@ -131,11 +131,33 @@ class z390Test {
         return asmFileExcludingExtension
     }
 
+    def mz390(Map kwargs=[:], String asmFilename, String... args) {
+
+        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
+        this.reset(asmFileExcludingExtension)
+        var rc = this.callMz390(asmFileExcludingExtension, args)
+        this.getOutput(asmFileExcludingExtension)
+        if (kwargs.get('asm_source') && this.tempDir)
+            this.tempDir.deleteDir()
+        return rc
+    }
+
     def asm(Map kwargs=[:], String asmFilename, String... args) {
 
         String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
         this.reset(asmFileExcludingExtension)
-        var rc = this.mz390(asmFileExcludingExtension, args)
+        var rc = this.callMz390(asmFileExcludingExtension, args)
+        this.getOutput(asmFileExcludingExtension)
+        if (kwargs.get('asm_source') && this.tempDir)
+            this.tempDir.deleteDir()
+        return rc
+    }
+
+    def lz390(Map kwargs=[:], String asmFilename, String... args) {
+
+        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
+//        this.reset(asmFileExcludingExtension)
+        int rc = this.callLz390(asmFileExcludingExtension, args)
         this.getOutput(asmFileExcludingExtension)
         if (kwargs.get('asm_source') && this.tempDir)
             this.tempDir.deleteDir()
@@ -146,10 +168,21 @@ class z390Test {
 
         String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
         this.reset(asmFileExcludingExtension)
-        var rc = this.mz390(asmFileExcludingExtension, args)
+        var rc = this.callMz390(asmFileExcludingExtension, args)
         if (rc == 0) {
-            rc = this.lz390(asmFileExcludingExtension, args)
+            rc = this.callLz390(asmFileExcludingExtension, args)
         }
+        this.getOutput(asmFileExcludingExtension)
+        if (kwargs.get('asm_source') && this.tempDir)
+            this.tempDir.deleteDir()
+        return rc
+    }
+
+    def ez390(Map kwargs=[:], String asmFilename, String... args) {
+
+        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
+//        this.reset(asmFileExcludingExtension)
+        int rc = this.callEz390(asmFileExcludingExtension, args)
         this.getOutput(asmFileExcludingExtension)
         if (kwargs.get('asm_source') && this.tempDir)
             this.tempDir.deleteDir()
@@ -160,11 +193,11 @@ class z390Test {
 
         String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
         this.reset(asmFileExcludingExtension)
-        var rc = this.mz390(asmFileExcludingExtension, args)
+        var rc = this.callMz390(asmFileExcludingExtension, args)
         if (rc == 0) {
-            rc = this.lz390(asmFileExcludingExtension, args)
+            rc = this.callLz390(asmFileExcludingExtension, args)
             if (rc == 0) {
-                rc = this.ez390(asmFileExcludingExtension, args)
+                rc = this.callEz390(asmFileExcludingExtension, args)
             }
         }
         this.getOutput(asmFileExcludingExtension)
