@@ -4,26 +4,26 @@ import org.junit.jupiter.api.Test
 
 class TestZ390Test extends z390Test {
 
-    var sysmac = pathJoin(this.project_root, "mac")
+    var sysmac = basePath("mac")
     var options = ['trace', 'noloadhigh', "SYSMAC(${sysmac})"]
 
     @Test
     void testAsm() {
-        int rc = this.asm(pathJoin("tests", "TESTINS1"), *options)
+        int rc = this.asm(basePath("tests", "TESTINS1"), *options)
         this.printOutput()
         assert rc == 0
     }
 
     @Test
     void testAsml() {
-        int rc = this.asml(pathJoin("tests", "TESTINS2"), *options)
+        int rc = this.asml(basePath("tests", "TESTINS2"), *options)
         this.printOutput()
         assert rc == 0
     }
 
     @Test
     void testAsmlg() {
-        int rc = this.asmlg(pathJoin("tests", "TESTINS2"), *options)
+        int rc = this.asmlg(basePath("tests", "TESTINS2"), *options)
         this.printOutput()
         assert rc == 0
     }
@@ -44,7 +44,7 @@ class TestZ390Test extends z390Test {
         int rc = this.asm("INLINE", asm_source: source, *options)
         this.printOutput()
         assert rc == 12   // Check return code
-        assert this.fileOutput['ERR'] =~ /AZ390 AZ390I invalid relatvie offset expression/  // check error present
+        assert this.fileOutput['ERR'] =~ /AZ390 AZ390I invalid relative offset expression/  // check error present
     }
 }
 

@@ -13,6 +13,12 @@ class z390Test {
     static void main(String[] args) {
         println new z390Test().message
     }
+
+    def basePath(String... pathItems) {
+        var fullPathItems = [this.project_root, *pathItems]
+        return fullPathItems.join(File.separator)
+    }
+
     def static pathJoin(String... pathItems) {
         return pathItems.join(File.separator)
     }
@@ -31,7 +37,7 @@ class z390Test {
         this.fileOutput = [:]
 
         for (ext in ["PRN", "ERR", "OBJ", "390", "OBJ", "LOG"]) {
-            var filename = pathJoin(asmFileExcludingExtension + '.' + ext)
+            var filename = basePath(asmFileExcludingExtension + '.' + ext)
             var deleteFile = new File(filename)
             if (deleteFile.exists()) {
                 deleteFile.delete()
@@ -41,7 +47,7 @@ class z390Test {
 
     def callMz390(String asmFileExcludingExtension, String... args) {
         println("Executing mz390: ${asmFileExcludingExtension}")
-        var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
+        var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
                    '-Xrs', '-Xms150000K', '-Xmx150000K', 'mz390', asmFileExcludingExtension, *args].join(" ")
         println(cmd)
         var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
@@ -56,7 +62,7 @@ class z390Test {
 
     def callLz390(String asmFileExcludingExtension, String... args) {
         println("Executing lz390: ${asmFileExcludingExtension}")
-        var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
+        var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
                    '-Xrs', 'lz390', asmFileExcludingExtension, *args].join(" ")
         println(cmd)
         var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
@@ -71,7 +77,7 @@ class z390Test {
 
     def callEz390(String asmFileExcludingExtension, String... args) {
         println("Executing ez390: ${asmFileExcludingExtension}")
-        var cmd = ["java", "-classpath", pathJoin(this.project_root, 'jar', 'z390.jar'),
+        var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
                    '-Xrs', 'ez390', asmFileExcludingExtension, *args].join(" ")
         println(cmd)
         var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
@@ -117,7 +123,7 @@ class z390Test {
         String asmFileExcludingExtension
         String asmSource = kwargs['asm_source'] ?: null
         if (asmSource) {
-            tempDir = File.createTempDir()
+            this.tempDir = File.createTempDir()
             this.tempDir.deleteOnExit()
             asmFileExcludingExtension = pathJoin(tempDir.absolutePath, asmFilename)
             println("Creating temp source: ${asmFileExcludingExtension}")
@@ -126,7 +132,7 @@ class z390Test {
                 write(asmSource)
             }
         } else {
-            asmFileExcludingExtension = new File(pathJoin(this.project_root, asmFilename))
+            asmFileExcludingExtension = new File(pathJoin(asmFilename))
         }
         return asmFileExcludingExtension
     }
