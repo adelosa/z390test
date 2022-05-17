@@ -1,6 +1,9 @@
 package org.z390.test
 
+import org.junit.jupiter.api.AfterEach
+
 class z390Test {
+
     var project_root = pathJoin('..', 'z390')
     var stdout = ""
     var stderr = ""
@@ -12,6 +15,41 @@ class z390Test {
 
     static void main(String[] args) {
         println new z390Test().message
+    }
+
+    z390Test() {
+        /**
+         * class constructor
+         */
+        if (System.getenv('Z390_PROJECT_ROOT')) {
+            this.project_root = System.getenv('Z390_PROJECT_ROOT')
+        }
+    }
+
+    @AfterEach
+    void cleanup() {
+        if (this.tempDir)
+            this.tempDir.deleteDir()
+    }
+
+    def createTempFile(String fileName, String fileContents) {
+        /**
+         * Utility method for creating temp option files used in tests
+         */
+        if (!tempDir) {
+            this.tempDir = File.createTempDir()
+            this.tempDir.deleteOnExit()
+        }
+        var fullFileName = pathJoin(tempDir.absolutePath, fileName)
+        println("Creating temp source: ${fullFileName}")
+        // to allow files to reference themselves, include {{fullFileName}} in contents
+        fileContents = fileContents.replaceAll(/\{\{fullFileName}}/, fullFileName)
+        println(fileContents)
+        new File(fullFileName).with {
+            createNewFile()
+            write(fileContents)
+        }
+        return fullFileName
     }
 
     def basePath(String... pathItems) {

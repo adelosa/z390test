@@ -16,18 +16,20 @@ You will need a Java SDK installed - version 8 or above.
 
 You will need the z390 source repository cloned to your local system.
 
-    git clone 
+    git clone https://github.com/z390development/z390.git
+    cd z390
 
 Build the z390 Java jar file for use by the tests. From the z390 root:
 
     bash/bldjar
-    win> bat/BLDJAR.BAT
+    win> bat\BLDJAR.BAT
 
 ## Run the tests
 
 Set the Z390_SOURCE_ROOT environment variable so the tests can find the Z390.jar and source.
 
     export Z390_SOURCE_ROOT /loc/of/z390
+    win> SET Z390_SOURCE_ROOT=c:\loc\of\z390
 
 Now run the tests from this directory
 
@@ -37,8 +39,7 @@ Now run the tests from this directory
     
 ## Writing test cases
 
-The following is a basic test case that executes an assembly of a
-module and checks the return code.
+The following is a basic test case that executes an assembly of a module and checks the return code.
 
 ```groovy
 import org.junit.jupiter.api.Test
@@ -57,7 +58,7 @@ class TestZ390Test extends z390Test {
 ```
 
 To use the standard framework, your class should extend `z390Test`
-which provided methods for running and capturing the output.
+which provides methods for running and capturing the output.
 
 The tests use standard JUnit test structures.
 
@@ -78,6 +79,14 @@ Parameters:
 
 Returns:
 * rc - The result code from the execution
+
+Methods available :
+* asm - Assemble only
+* asml - Assemble and link. Any non zero RC on assemble will exit with RC
+* asmlg - Assemble, link and go. Any non zero RC on assemble and link will exit with RC
+* mz390 - Assemble only
+* lz390 - Link only. Output not cleared prior to run
+* ez390 - Run only. Output not cleared prior to run
 
 ### assemble from inline source
 
@@ -125,4 +134,18 @@ basePath("tests", "TESTINS1")
 Use this to construct file paths relative to the z390 source root. Ensures platform independent 
 file handling.
 
-Set the z390 source root using envvar `Z390_SOURCE_ROOT`
+Set the z390 source root using envvar `Z390_SOURCE_ROOT`. If not provided, defaults to "../z390"
+
+### createTempFile -- create a temp file for use in the test
+
+```groovy
+var tempFileContents = """Line 1: Some text
+Line 2: This is a test file
+"""
+var tempFilename = createTempFile("myTempFile.txt", tempFileContents)
+println(tempFilename)
+```
+
+Use this to create temp files used in your tests. Returns full path to temp filename.
+
+Note - Temp directory is deleted at end of test.

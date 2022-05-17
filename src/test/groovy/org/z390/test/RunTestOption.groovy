@@ -4,29 +4,6 @@ import org.junit.jupiter.api.Test
 
 class RunTestOption extends z390Test {
 
-    File fileDir = null
-
-    def createFile(String fileName, String fileContents) {
-        /**
-         * Utility method for creating temp option files used in tests
-         */
-        if (!fileDir) {
-            this.fileDir = File.createTempDir()
-            this.fileDir.deleteOnExit()
-        }
-        var fullFileName = pathJoin(fileDir.absolutePath, fileName)
-        println("Creating temp source: ${fullFileName}")
-        // to allow files to reference themselves, include {{fullFileName}} in contents
-        fileContents = fileContents.replaceAll(/\{\{fullFileName}}/, fullFileName)
-        println(fileContents)
-        new File(fullFileName).with {
-            createNewFile()
-            write(fileContents)
-        }
-        return fullFileName
-    }
-
-
     @Test
     void test_TESTOPT_OK() {
         /**
@@ -58,19 +35,18 @@ class RunTestOption extends z390Test {
 * Test with a valid option
   chksrc(2)  * Check sources for illegal characters
 """
-        var innerOptionFilename = createFile("testopt0.OPT", testOpt0FileContents)
+        var innerOptionFilename = createTempFile("testopt0.OPT", testOpt0FileContents)
         var testOpt2LFileContents = """
 * Test with a valid subfile
   chksrc(2)  * Check sources for illegal characters
 @${innerOptionFilename}
 """
-        var OptionFilename = createFile("testopt2L.OPT", testOpt2LFileContents)
+        var OptionFilename = createTempFile("testopt2L.OPT", testOpt2LFileContents)
         int rc = this.asm(basePath("rt", "mlc", "TESTOPT"), "@${OptionFilename}")
         this.printOutput()
         assert rc == 0
         assert fileOutput['PRN'] =~ /testopt2L.OPT=/
         assert fileOutput['PRN'] =~ /testopt0.OPT=/
-        this.fileDir.deleteDir()
     }
 
     @Test
@@ -94,12 +70,11 @@ class RunTestOption extends z390Test {
 * Test with a self-reference
   chksrc(2)  * Check sources for illegal characters
 @{{fullFileName}}"""
-        var optionFilename = createFile('testopt4L.OPT', OptionFileContents)
+        var optionFilename = createTempFile('testopt4L.OPT', OptionFileContents)
         int rc = this.asm(basePath("rt", "mlc", "TESTOPT"), "@${optionFilename}")
         this.printOutput()
         assert rc == 16
         assert this.stdout =~ /TZ390E abort error 21 - ignoring .*testopt4L.OPT as it has already been processed as an option file, referenced in .*testopt4L.OPT/
-        this.fileDir.deleteDir()
     }
 
     @Test
@@ -108,23 +83,23 @@ class RunTestOption extends z390Test {
          * test 6 - should assemble with error for circular reference
          */
         // Start with a dummy file - we will rewrite contents later, just need filename for now
-        var opt5LFilename = createFile("testopt5L.OPT", "")
+        var opt5LFilename = createTempFile("testopt5L.OPT", "")
         //
         var opt5LBFileContents = """* Test with a circular reference
   chksrc(2)  * Check sources for illegal characters
 @${opt5LFilename}
 """
-        var opt5LBFilename = createFile("testopt5LB.OPT", opt5LBFileContents)
+        var opt5LBFilename = createTempFile("testopt5LB.OPT", opt5LBFileContents)
 
         var opt5LAFileContents = """* Test with a circular reference
   chksrc(2)  * Check sources for illegal characters
 @${opt5LBFilename}
 """
-        var opt5LAFilename = createFile("testopt5LA.OPT", opt5LAFileContents)
+        var opt5LAFilename = createTempFile("testopt5LA.OPT", opt5LAFileContents)
         var opt5LFileContents = """* Test with a circular reference
   chksrc(2)  * Check sources for illegal characters
 @${opt5LAFilename}"""
-        opt5LFilename = createFile("testopt5L.OPT", opt5LFileContents)
+        opt5LFilename = createTempFile("testopt5L.OPT", opt5LFileContents)
 
         int rc = this.asm(basePath("rt", "mlc", "TESTOPT"), "@${opt5LFilename}")
         this.printOutput()
