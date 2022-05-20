@@ -1,12 +1,13 @@
 package org.z390.test
 
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 
 class z390Test {
 
     var project_root = pathJoin('..', 'z390')
-    var stdout = ""
-    var stderr = ""
+    String stdout = ""
+    String stderr = ""
     var env = [:]
     var fileOutput = [:]
     var message = "z390Test - Test framework for z390 project"
@@ -25,14 +26,19 @@ class z390Test {
             this.project_root = System.getenv('Z390_PROJECT_ROOT')
         }
     }
-
+    @BeforeEach
+    void setUp() {
+        this.stdout = ""
+        this.stderr = ""
+        this.fileOutput = [:]
+    }
     @AfterEach
-    void cleanup() {
+    void cleanUp() {
         if (this.tempDir)
             this.tempDir.deleteDir()
     }
 
-    def createTempFile(String fileName, String fileContents) {
+    def createTempFile(String fileName, String fileContents, boolean returnExt=true) {
         /**
          * Utility method for creating temp option files used in tests
          */
@@ -49,12 +55,22 @@ class z390Test {
             createNewFile()
             write(fileContents)
         }
+        String ext = fullFileName.substring(fullFileName.lastIndexOf("."))
+        println(ext.toUpperCase())
+        if (!returnExt || ext.toUpperCase() in ('.MLC'))
+            fullFileName = filenameWithoutExtension(fullFileName)
         return fullFileName
     }
 
     def basePath(String... pathItems) {
         var fullPathItems = [this.project_root, *pathItems]
         return fullPathItems.join(File.separator)
+    }
+
+    static String filenameWithoutExtension(String filename) {
+        String result = filename[0..<filename.lastIndexOf('.')]
+        println(result)
+        return result
     }
 
     def static pathJoin(String... pathItems) {
@@ -69,11 +85,10 @@ class z390Test {
         return envList
     }
 
-    def reset(String asmFileExcludingExtension) {
-        this.stdout = ""
-        this.stderr = ""
-        this.fileOutput = [:]
-
+    def clean(String asmFileExcludingExtension) {
+        /**
+         * clear files for module
+         */
         for (ext in ["PRN", "ERR", "OBJ", "390", "OBJ", "LOG"]) {
             var filename = basePath(asmFileExcludingExtension + '.' + ext)
             var deleteFile = new File(filename)
@@ -83,40 +98,10 @@ class z390Test {
         }
     }
 
-    def callMz390(String asmFileExcludingExtension, String... args) {
-        println("Executing mz390: ${asmFileExcludingExtension}")
+    def callZ390(String asmFileExcludingExtension, String command, String... args) {
+        println("Executing ${command}: ${asmFileExcludingExtension}")
         var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
-                   '-Xrs', '-Xms150000K', '-Xmx150000K', 'mz390', asmFileExcludingExtension, *args].join(" ")
-        println(cmd)
-        var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
-        var sout = new StringBuilder()
-        var serr = new StringBuilder()
-        proc.consumeProcessOutput(sout, serr)
-        proc.waitForOrKill(this.cmdTimeMs)
-        this.stdout += sout
-        this.stderr += serr
-        return proc.exitValue()
-    }
-
-    def callLz390(String asmFileExcludingExtension, String... args) {
-        println("Executing lz390: ${asmFileExcludingExtension}")
-        var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
-                   '-Xrs', 'lz390', asmFileExcludingExtension, *args].join(" ")
-        println(cmd)
-        var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
-        var sout = new StringBuilder()
-        var serr = new StringBuilder()
-        proc.consumeProcessOutput(sout, serr)
-        proc.waitForOrKill(this.cmdTimeMs)
-        this.stdout += sout
-        this.stderr += serr
-        return proc.exitValue()
-    }
-
-    def callEz390(String asmFileExcludingExtension, String... args) {
-        println("Executing ez390: ${asmFileExcludingExtension}")
-        var cmd = ["java", "-classpath", basePath('jar', 'z390.jar'),
-                   '-Xrs', 'ez390', asmFileExcludingExtension, *args].join(" ")
+                   '-Xrs', '-Xms150000K', '-Xmx150000K', command, asmFileExcludingExtension, *args].join(" ")
         println(cmd)
         var proc = cmd.execute(this.getEnvList(), null)   // , workDir);
         var sout = new StringBuilder()
@@ -140,114 +125,84 @@ class z390Test {
     }
 
     def printOutput() {
-        println(("*" * 20) + " stdout " + ("*" * 20))
-        this.stdout.lines().eachWithIndex{ String line, int lineNum ->
+        String linefeed = /\n\r|\n/
+        String[] lines = this.stdout.split(linefeed)
+        println(("*" * 20) + " stdout (${lines.length} lines) " + ("*" * 20))
+        lines.eachWithIndex{ String line, int lineNum ->
             println("${String.format('%05d',lineNum)}  ${line}")
         }
-        println(("*" * 20) + " stderr " + ("*" * 20))
-        this.stderr.lines().eachWithIndex{ String line, int lineNum ->
+        lines = this.stderr.split(linefeed)
+        println(("*" * 20) + " stderr (${lines.length} lines) " + ("*" * 20))
+        lines.eachWithIndex{ String line, int lineNum ->
             println("${String.format('%05d',lineNum)}  ${line}")
         }
         this.fileOutput.each { fileExt, data ->
-            println(("*" * 20) + " ${fileExt} " + ("*" * 20))
-            String data_string = data
-            data_string.lines().eachWithIndex{ String line, int lineNum ->
+            lines = data.toString().split(linefeed)
+            println(("*" * 20) + " ${fileExt} (${lines.length} lines) " + ("*" * 20))
+            lines.eachWithIndex{ String line, int lineNum ->
                 println("${String.format('%05d',lineNum)}  ${line}")
             }
         }
     }
 
-    String getAsmFileExcludingExtension(Map kwargs=[:], String asmFilename, String... args) {
-        String asmFileExcludingExtension
-        String asmSource = kwargs['asm_source'] ?: null
-        if (asmSource) {
-            this.tempDir = File.createTempDir()
-            this.tempDir.deleteOnExit()
-            asmFileExcludingExtension = pathJoin(tempDir.absolutePath, asmFilename)
-            println("Creating temp source: ${asmFileExcludingExtension}")
-            new File(pathJoin(tempDir.absolutePath, asmFilename + ".MLC")).with {
-                createNewFile()
-                write(asmSource)
-            }
-        } else {
-            asmFileExcludingExtension = new File(pathJoin(asmFilename))
-        }
-        return asmFileExcludingExtension
-    }
-
-    def mz390(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-        this.reset(asmFileExcludingExtension)
-        var rc = this.callMz390(asmFileExcludingExtension, args)
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
-        return rc
-    }
+    def mz390 = this.&asm
 
     def asm(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-        this.reset(asmFileExcludingExtension)
-        var rc = this.callMz390(asmFileExcludingExtension, args)
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
+        /**
+         * Assemble
+         */
+        this.clean(asmFilename)
+        int rc = this.callZ390(asmFilename, 'mz390', args)
+        this.getOutput(asmFilename)
         return rc
     }
 
     def lz390(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-//        this.reset(asmFileExcludingExtension)
-        int rc = this.callLz390(asmFileExcludingExtension, args)
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
+        /**
+         * lz390
+         * !! NOTE !! Does not clean intermediate files
+         */
+        int rc = this.callZ390(asmFilename, 'lz390', args)
+        this.getOutput(asmFilename)
         return rc
     }
 
     def asml(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-        this.reset(asmFileExcludingExtension)
-        var rc = this.callMz390(asmFileExcludingExtension, args)
+        /**
+         * Assemble and link
+         */
+        this.clean(asmFilename)
+        int rc = this.callZ390(asmFilename, 'mz390', args)
         if (rc == 0) {
-            rc = this.callLz390(asmFileExcludingExtension, args)
+            rc = this.callZ390(asmFilename, 'lz390', args)
         }
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
+        this.getOutput(asmFilename)
         return rc
     }
 
     def ez390(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-//        this.reset(asmFileExcludingExtension)
-        int rc = this.callEz390(asmFileExcludingExtension, args)
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
+        /**
+         * ez390
+         * !! NOTE !! Does not clean intermediate files
+         */
+        int rc = this.callZ390(asmFilename, 'ez390', args)
+        this.getOutput(asmFilename)
         return rc
     }
 
     def asmlg(Map kwargs=[:], String asmFilename, String... args) {
-
-        String asmFileExcludingExtension = this.getAsmFileExcludingExtension(kwargs, asmFilename)
-        this.reset(asmFileExcludingExtension)
-        var rc = this.callMz390(asmFileExcludingExtension, args)
+        /**
+         * Assemble, link and go
+         */
+        this.clean(asmFilename)
+        int rc = this.callZ390(asmFilename, 'mz390', args)
         if (rc == 0) {
-            rc = this.callLz390(asmFileExcludingExtension, args)
+            rc = this.callZ390(asmFilename, 'lz390', args)
             if (rc == 0) {
-                rc = this.callEz390(asmFileExcludingExtension, args)
+                rc = this.callZ390(asmFilename, 'ez390', args)
             }
         }
-        this.getOutput(asmFileExcludingExtension)
-        if (kwargs.get('asm_source') && this.tempDir)
-            this.tempDir.deleteDir()
+        this.getOutput(asmFilename)
         return rc
     }
-
 }

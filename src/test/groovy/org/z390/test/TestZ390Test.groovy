@@ -41,11 +41,10 @@ class TestZ390Test extends z390Test {
          RETURN (14,12)
          END   TESTB
     """
-        int rc = this.asm("INLINE", asm_source: source, *options)
+        String sourceFile = this.createTempFile("INLINE.MLC", source)
+        int rc = this.asm(sourceFile, *options)
         this.printOutput()
         assert rc == 12   // Check return code
         assert this.fileOutput['ERR'] =~ /AZ390 AZ390I invalid relative offset expression/  // check error present
     }
 }
-
-

@@ -101,17 +101,12 @@ var source = """TESTB    START 0
      RETURN (14,12)
      END   TESTB
 """
-int rc = this.asm("INLINE", asm_source: source, *options)
+String sourceFilename = createTempFile("INLINE.MLC", source)
+int rc = this.asm(sourceFilename, *options)
 assert rc == 0
 ```
-Parameters:
-* asmFile - The HLASM filename to assemble. Do not include path, just file name.
-* args... - 0-n parmeters to pass to the asm program, generally options.
-* asm_source -  Provides source instead of from file.
-
-Returns:
-* rc - The result code from the execution
-
+Use the `createTempFile` method to create a file that can be
+used in the assembly.
 
 ### printOutput -- prints captured output
 
@@ -148,4 +143,4 @@ println(tempFilename)
 
 Use this to create temp files used in your tests. Returns full path to temp filename.
 
-Note - Temp directory is deleted at end of test.
+Note - Temp directory is deleted at end of testcase.
