@@ -22,7 +22,7 @@ class RunTestOption extends z390Test {
         int rc = this.asm(basePath("rt", "mlc", "TESTOPT"), "@${basePath("rt", "opt", "testopt1.OPT")}")
         this.printOutput()
         assert rc == 16
-        assert this.fileOutput['ERR'] =~ /invalid options -\s{2}chksrc\(2X\)/
+        assert this.fileData['ERR'] =~ /invalid options -\s{2}chksrc\(2X\)/
         assert this.stdout =~ /invalid options -\s{2}chksrc\(2X\)/
     }
 
@@ -45,8 +45,8 @@ class RunTestOption extends z390Test {
         int rc = this.asm(basePath("rt", "mlc", "TESTOPT"), "@${OptionFilename}")
         this.printOutput()
         assert rc == 0
-        assert fileOutput['PRN'] =~ /testopt2L.OPT=/
-        assert fileOutput['PRN'] =~ /testopt0.OPT=/
+        assert fileData['PRN'] =~ /testopt2L.OPT=/
+        assert fileData['PRN'] =~ /testopt0.OPT=/
     }
 
     @Test
@@ -58,7 +58,7 @@ class RunTestOption extends z390Test {
         this.printOutput()
         assert rc == 16
         assert this.stdout =~ /TZ390E abort error 21 - invalid options -\s{2}@rt\/opt\/testoptX/
-        assert this.fileOutput['ERR'] =~ /TZ390E abort error 21 - invalid options -\s{2}@rt\/opt\/testoptX/
+        assert this.fileData['ERR'] =~ /TZ390E abort error 21 - invalid options -\s{2}@rt\/opt\/testoptX/
     }
 
     @Test

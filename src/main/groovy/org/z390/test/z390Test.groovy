@@ -9,7 +9,7 @@ class z390Test {
     String stdout = ""
     String stderr = ""
     var env = [:]
-    var fileOutput = [:]
+    var fileData = [:]
     var message = "z390Test - Test framework for z390 project"
     int cmdTimeMs = 100000
     File tempDir = null
@@ -30,7 +30,7 @@ class z390Test {
     void setUp() {
         this.stdout = ""
         this.stderr = ""
-        this.fileOutput = [:]
+        this.fileData = [:]
     }
     @AfterEach
     void cleanUp() {
@@ -62,7 +62,7 @@ class z390Test {
         return fullFileName
     }
 
-    def basePath(String... pathItems) {
+    String basePath(String... pathItems) {
         var fullPathItems = [this.project_root, *pathItems]
         return fullPathItems.join(File.separator)
     }
@@ -116,32 +116,32 @@ class z390Test {
     def getOutput(String asmFileExcludingExtension) {
         for (String ext in ["PRN", "ERR", "LOG", "LST"]) {
             var filename = pathJoin(asmFileExcludingExtension + '.' + ext)
-            var outFile = new File(filename)
-            if (outFile.exists()) {
-                println("reading ${ext} output")
-                this.fileOutput[ext] = outFile.text
-            }
+            this.loadFile(filename, ext)
+        }
+    }
+
+    def loadFile(String filename, String label) {
+        var outFile = new File(filename)
+        if (outFile.exists()) {
+            println("reading ${filename}")
+            this.fileData[label] = outFile.text
+        }
+    }
+
+    static printFile(data, label) {
+        String linefeed = /\n\r|\n/
+        String[] lines = data.toString().split(linefeed)
+        println(("*" * 20) + " ${label} (${lines.length} lines) " + ("*" * 20))
+        lines.eachWithIndex{ String line, int lineNum ->
+            println("${String.format('%05d',lineNum)}  ${line}")
         }
     }
 
     def printOutput() {
-        String linefeed = /\n\r|\n/
-        String[] lines = this.stdout.split(linefeed)
-        println(("*" * 20) + " stdout (${lines.length} lines) " + ("*" * 20))
-        lines.eachWithIndex{ String line, int lineNum ->
-            println("${String.format('%05d',lineNum)}  ${line}")
-        }
-        lines = this.stderr.split(linefeed)
-        println(("*" * 20) + " stderr (${lines.length} lines) " + ("*" * 20))
-        lines.eachWithIndex{ String line, int lineNum ->
-            println("${String.format('%05d',lineNum)}  ${line}")
-        }
-        this.fileOutput.each { fileExt, data ->
-            lines = data.toString().split(linefeed)
-            println(("*" * 20) + " ${fileExt} (${lines.length} lines) " + ("*" * 20))
-            lines.eachWithIndex{ String line, int lineNum ->
-                println("${String.format('%05d',lineNum)}  ${line}")
-            }
+        printFile(this.stdout, 'stdout')
+        printFile(this.stderr, 'stderr')
+        this.fileData.each { fileExt, data ->
+            printFile(data, fileExt)
         }
     }
 

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test
 
 class RunAsmTests extends z390Test {
 
-    var options = ['trace', 'noloadhigh', "SYSMAC(${basePath("mac")})"]
+    var options = ['trace', 'noloadhigh', "SYSMAC(${basePath("mac")})", "SYSOBJ(${basePath("linklib")})"]
 
     @Test
     void test_TESTINS1() {
@@ -63,6 +63,30 @@ class RunAsmTests extends z390Test {
     @Test
     void test_IS215() {
         int rc = this.asmlg(basePath("rt", "mlc", "IS215"), *options, 'optable(z390)')
+        this.printOutput()
+        assert rc == 0
+    }
+    @Test
+    void test_TESTDC1() {
+        int rc = this.asmlg(basePath("rt", "mlc", "TESTDC1"), *options, 'optable(z390)')
+        this.printOutput()
+        assert rc == 0
+    }
+    @Test
+    void test_TESTASC1() {
+        int rc = this.asmlg(basePath("rt", "mlc", "TESTASC1"), *options, 'ASCII', 'optable(z390)')
+        this.printOutput()
+        assert rc == 0
+    }
+    @Test
+    void test_TESTDC2() {
+        int rc = this.asmlg(basePath("rt", "mlc", "TESTDC2"), *options, 'optable(z390)')
+        this.printOutput()
+        assert rc == 0
+    }
+    @Test
+    void test_TESTDC3() {
+        int rc = this.asmlg(basePath("rt", "mlc", "TESTDC3"), *options, 'optable(z390)')
         this.printOutput()
         assert rc == 0
     }

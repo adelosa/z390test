@@ -40,13 +40,14 @@ class RunRtTests extends z390Test {
     }
     @Test
     void test_TESTERR4() {
-        // rt7 = asml + mz390
         int rc
-        rc = this.asml(basePath("rt", "test", "TESTERR4"), *rt7AsmlOptions)
-        assert rc == 0
-        rc = this.ez390(basePath("rt", "test", "TESTERR4"), *rt7Ez390Options)
+        rc = this.asmlg(basePath("rt", "test", "TESTERR4"), 'bal', 'notiming', *libs)
         this.printOutput()
         assert rc == 16
+        assert this.stdout =~ /TESTERR4 TEST INVALID DCBDSNAM CAUSING S013 ABEND/
+        assert this.stdout =~ /EZ390E error\s{2}12 program aborting due to abend S013/
+        assert this.fileData['LOG'] =~ /TESTERR4 TEST INVALID DCBDSNAM CAUSING S013 ABEND/
+        assert this.fileData['LOG'] =~ /EZ390E error\s{2}12 program aborting due to abend S013/
     }
     @Test
     void test_TESTERR5() {

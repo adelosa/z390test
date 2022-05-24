@@ -45,6 +45,6 @@ class TestZ390Test extends z390Test {
         int rc = this.asm(sourceFile, *options)
         this.printOutput()
         assert rc == 12   // Check return code
-        assert this.fileOutput['ERR'] =~ /AZ390 AZ390I invalid relative offset expression/  // check error present
+        assert this.fileData['ERR'] =~ /AZ390 AZ390I invalid relative offset expression/  // check error present
     }
 }
