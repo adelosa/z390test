@@ -50,14 +50,12 @@ class z390Test {
         println("Creating temp source: ${fullFileName}")
         // to allow files to reference themselves, include {{fullFileName}} in contents
         fileContents = fileContents.replaceAll(/\{\{fullFileName}}/, fullFileName)
-        println(fileContents)
         new File(fullFileName).with {
             createNewFile()
             write(fileContents)
         }
         String ext = fullFileName.substring(fullFileName.lastIndexOf("."))
-        println(ext.toUpperCase())
-        if (!returnExt || ext.toUpperCase() in ('.MLC'))
+       if (!returnExt || ext.toUpperCase() in ('.MLC'))
             fullFileName = filenameWithoutExtension(fullFileName)
         return fullFileName
     }
