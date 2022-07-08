@@ -77,9 +77,7 @@ class z390Test {
 
     def getEnvList() {
         def envList = []
-        for (key in this.env) {
-            envList.add("${key}=${this.env[key]}")
-        }
+        this.env.each{item -> envList.add("${item.key}=${item.value}")}
         return envList
     }
 
