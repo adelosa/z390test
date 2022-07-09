@@ -36,6 +36,12 @@ Set the Z390_SOURCE_ROOT environment variable so the tests can find the Z390.jar
     export Z390_SOURCE_ROOT /loc/of/z390
     win> SET Z390_SOURCE_ROOT=c:\loc\of\z390
 
+By default the tests will not show the output of the `printOutput` method (see below).
+While developing tests, it is useful to see this output.
+
+    export Z390_PRINT_OUTPUT 1
+    win> SET Z390_PRINT_OUTPUT=1
+
 Now run the tests from this directory
 
     ./gradlew test
@@ -137,7 +143,7 @@ loadFile(filename, label)
 You can access the file contents after loading the file
 
 ```groovy
-fileContents = fileData[label] 
+fileData[label] 
 ```
 
 ### printOutput -- prints captured data

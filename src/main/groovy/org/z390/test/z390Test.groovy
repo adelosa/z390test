@@ -12,6 +12,8 @@ class z390Test {
     var fileData = [:]
     var message = "z390Test - Test framework for z390 project"
     int cmdTimeMs = 100000
+    boolean printOutput = false
+
     File tempDir = null
 
     static void main(String[] args) {
@@ -23,7 +25,10 @@ class z390Test {
          * class constructor
          */
         if (System.getenv('Z390_PROJECT_ROOT')) {
-            this.project_root = System.getenv('Z390_PROJECT_ROOT')
+            this.project_root = new File(System.getenv('Z390_PROJECT_ROOT'))
+        }
+        if (System.getenv('Z390_PRINT_OUTPUT')) {
+            printOutput = true
         }
     }
     @BeforeEach
@@ -61,6 +66,11 @@ class z390Test {
     }
 
     String basePath(String... pathItems) {
+        var fullPathItems = [this.project_root, *pathItems]
+        return new File(fullPathItems.join(File.separator)).getCanonicalPath()
+    }
+
+    String basePathRelative(String... pathItems) {
         var fullPathItems = [this.project_root, *pathItems]
         return fullPathItems.join(File.separator)
     }
@@ -133,7 +143,13 @@ class z390Test {
         }
     }
 
-    def printOutput() {
+    def printOutput(String... args) {
+        if (!printOutput) return
+        var label = args.join()
+        if (!label) {
+            label = "PRINT OUTPUT"
+        }
+        println("=-=-=-=-=-=-=-=-=-=-=  ${label} =-=-=-=-=-=-=-=-=-=-=")
         printFile(this.stdout, 'stdout')
         printFile(this.stderr, 'stderr')
         this.fileData.each { fileExt, data ->
@@ -141,7 +157,9 @@ class z390Test {
         }
     }
 
-    def mz390 = this.&asm
+    def mz390(Map kwargs=[:], String asmFilename, String... args) {
+        return asm(kwargs, asmFilename, args)
+    }
 
     def asm(Map kwargs=[:], String asmFilename, String... args) {
         /**

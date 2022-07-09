@@ -16,9 +16,9 @@ class RunCmdProc extends z390Test {
 
         // regex replacement of batch file locations - use basePath
         String WinBatOld = /C'rt\\test\\bat\\TESTCMD3.BAT',X'00'.*\n/
-        var WinBatNew = "C'${basePath('rt','test','bat','TESTCMD3.BAT')}',X'00'\n"
+        var WinBatNew = "C'${basePathRelative('rt','test','bat','TESTCMD3.BAT')}',X'00'\n"
         String BashOld = "C'rt/test/bash/testcmd3',X'00'.*\n"
-        var BashNew = "C'${basePath('rt','test','bash','testcmd3')}',X'00'\n"
+        var BashNew = "C'${basePathRelative('rt','test','bash','testcmd3')}',X'00'\n"
 
         // load the original source file
         loadFile(basePath("rt", "test", "TESTCMD3.MLC"), 'source')
@@ -46,14 +46,14 @@ class RunCmdProc extends z390Test {
             println(/TstCmdW${let[0]} DC    C'\"rt\\test\\bat\\TESTCMD4${let[1]}.BAT\"'.*\n/)
             source = source.replaceAll(
                     /TstCmdW${let[0]} DC    C'\"rt\\test\\bat\\TESTCMD4${let[1]}.BAT"'.*\n/,
-                    "TstCmdW${let[0]} DC    C'\"${basePath('rt', 'test', 'bat', "TESTCMD4${let[1]}")}\"'\n"
+                    "TstCmdW${let[0]} DC    C'\"${basePathRelative('rt', 'test', 'bat', "TESTCMD4${let[1]}")}\"'\n"
             )
         }
         for (let in [[1, 'a'],[2, 'b'] ,[3, 'c']]) {
             println("TstCmdL${let[0]} DC    C'\"rt/test/bash/testcmd4${let[1]}\"'.*\n")
             source = source.replaceAll(
                     "TstCmdL${let[0]} DC    C'\"rt/test/bash/testcmd4${let[1]}\"'.*\n",
-                    "TstCmdL${let[0]} DC    C'\"${basePath('rt', 'test', 'bash', "testcmd4${let[1]}")}\"'\n"
+                    "TstCmdL${let[0]} DC    C'\"${basePathRelative('rt', 'test', 'bash', "testcmd4${let[1]}")}\"'\n"
             )
         }
 
