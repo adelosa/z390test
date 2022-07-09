@@ -219,4 +219,30 @@ class z390Test {
         this.getOutput(asmFilename)
         return rc
     }
+
+    def cblclg(Map kwargs=[:], String cobFilename, String... args) {
+        /**
+         * cobol compile link and go
+         */
+        this.clean(cobFilename)
+        int rc
+        rc = this.callZ390(cobFilename, 'zc390', *args)
+        if (rc != 0) return rc  // exit if issue
+
+        var cobfiledir = new File(cobFilename).getParent()
+        var cobOptions = ['BAL', 'NOLISTCALL', 'MAXGBL(1500000)',
+                      "SYSMAC(${basePath('zcobol', 'mac')}+${basePath('mac')})".toString(),
+                      "SYSCPY(${cobfiledir}+${basePath('zcobol', 'cpy')})".toString()
+        ]
+        var runOptions = ["SYS390(${basePath('zcobol', 'lib')}+${cobfiledir})"]
+
+        rc = this.callZ390(cobFilename, 'mz390', *(cobOptions + args.toList()))
+        if (rc == 0) {
+            rc = this.callZ390(cobFilename, 'lz390', *args)
+            if (rc == 0) {
+                rc = this.callZ390(cobFilename, 'ez390', *runOptions)
+            }
+        }
+        return rc
+    }
 }
