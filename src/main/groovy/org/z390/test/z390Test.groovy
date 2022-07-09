@@ -60,7 +60,7 @@ class z390Test {
             write(fileContents)
         }
         String ext = fullFileName.substring(fullFileName.lastIndexOf("."))
-       if (!returnExt || ext.toUpperCase() in ('.MLC'))
+       if (!returnExt || ext.toUpperCase() in ['.MLC', '.CBL'])
             fullFileName = filenameWithoutExtension(fullFileName)
         return fullFileName
     }
@@ -217,6 +217,24 @@ class z390Test {
             }
         }
         this.getOutput(asmFilename)
+        return rc
+    }
+
+    def cblc(Map kwargs=[:], String cobFilename, String... args) {
+        /**
+         * cobol compile
+         */
+        this.clean(cobFilename)
+        int rc
+        rc = this.callZ390(cobFilename, 'zc390', *args)
+        if (rc != 0) return rc  // exit if issue
+
+        var cobfiledir = new File(cobFilename).getParent()
+        var cobOptions = ['BAL', 'NOLISTCALL', 'MAXGBL(1500000)',
+                          "SYSMAC(${basePath('zcobol', 'mac')}+${basePath('mac')})".toString(),
+                          "SYSCPY(${cobfiledir}+${basePath('zcobol', 'cpy')})".toString()
+        ]
+        rc = this.callZ390(cobFilename, 'mz390', *(cobOptions + args.toList()))
         return rc
     }
 
