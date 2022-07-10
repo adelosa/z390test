@@ -95,8 +95,8 @@ class z390Test {
         /**
          * clear files for module
          */
-        for (ext in ["PRN", "ERR", "OBJ", "390", "OBJ", "LOG"]) {
-            var filename = basePath(asmFileExcludingExtension + '.' + ext)
+        for (ext in ["PRN", "ERR", "OBJ", "390", "OBJ", "LOG", "LST", "STA"]) {
+            var filename = asmFileExcludingExtension + '.' + ext
             var deleteFile = new File(filename)
             if (deleteFile.exists()) {
                 deleteFile.delete()

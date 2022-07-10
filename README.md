@@ -184,3 +184,71 @@ println(tempFilename)
 Use this to create temp files used in your tests. Returns full path to temp filename.
 
 Note - Temp directory is deleted at end of testcase.
+
+
+## Hints and tips
+
+### Need to execute logic before tests run 
+
+You have 2 options.
+
+#### Run logic before all tests in class only once
+
+
+```groovy
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.TestInstance.Lifecycle
+
+@TestInstance(Lifecycle.PER_CLASS)
+class MyTestClass extends z390Test {
+
+    @BeforeAll
+    void run_once_for_class() {
+        // put your logic here
+    }
+}
+```
+
+#### Run logic before each test in a class
+
+```groovy
+class MyTestClass extends z390Test {
+
+    @BeforeEach
+    void run_before_every_test() {
+        // put your logic here
+    }
+}
+```
+
+### Send printOutput to stdout
+
+By default, the printOutput command will not send its output.
+The following section shows you how to see the output.
+
+#### for a specific test
+
+```groovy
+@Test
+void my_test() {
+    printOutput = true
+    // test code here
+}
+
+```
+
+#### for a specific class
+
+```groovy
+class MyTestClass extends z390Test {
+    MyTestClass() {
+        printOutput = true
+    }
+}
+```
+
+#### for all tests
+
+```bash
+export Z390_PRINT_OUTPUT=1
+```
