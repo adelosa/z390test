@@ -135,7 +135,7 @@ class z390Test {
     }
 
     static printFile(data, label) {
-        String linefeed = /\n\r|\n/
+        String linefeed = /\r\n|\n/
         String[] lines = data.toString().split(linefeed)
         println(("*" * 20) + " ${label} (${lines.length} lines) " + ("*" * 20))
         lines.eachWithIndex{ String line, int lineNum ->
