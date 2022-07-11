@@ -43,14 +43,12 @@ class RunCmdProc extends z390Test {
 
         // update the bat/bash file locations in source
         for (let in [[1, 'A'],[2, 'B'] ,[3, 'C']]) {
-            println(/TstCmdW${let[0]} DC    C'\"rt\\test\\bat\\TESTCMD4${let[1]}.BAT\"'.*\n/)
             source = source.replaceAll(
                     /TstCmdW${let[0]} DC    C'\"rt\\test\\bat\\TESTCMD4${let[1]}.BAT"'.*\n/,
                     "TstCmdW${let[0]} DC    C'\"${basePathRelative('rt', 'test', 'bat', "TESTCMD4${let[1]}")}\"'\n"
             )
         }
         for (let in [[1, 'a'],[2, 'b'] ,[3, 'c']]) {
-            println("TstCmdL${let[0]} DC    C'\"rt/test/bash/testcmd4${let[1]}\"'.*\n")
             source = source.replaceAll(
                     "TstCmdL${let[0]} DC    C'\"rt/test/bash/testcmd4${let[1]}\"'.*\n",
                     "TstCmdL${let[0]} DC    C'\"${basePathRelative('rt', 'test', 'bash', "testcmd4${let[1]}")}\"'\n"

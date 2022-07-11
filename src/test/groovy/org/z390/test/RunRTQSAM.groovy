@@ -9,7 +9,6 @@ class RunRTQSAM extends z390Test {
     var options = ["SYSMAC(${basePath("mac")})"]
 
     void run_test(String postfix) {
-        printOutput = true
         env = ['SNAPOUT': 'DUMMY', 'SYSUT2': basePath('qsam', "TEST${postfix}.TFV")]
         int rc
         rc = asmlg(basePath('qsam', "BLD${postfix}"), *options)

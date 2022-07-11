@@ -10,10 +10,6 @@ class RunZSTRMacTest extends z390Test {
             "SYSCPY(${basePath("mac")})",
     ]
 
-    RunZSTRMacTest() {
-        this.printOutput = true
-    }
-
     @Test
     void test_ZSTRMAC() {
         /*
