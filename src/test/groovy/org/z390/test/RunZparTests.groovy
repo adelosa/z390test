@@ -12,7 +12,6 @@ class RunZparTests extends z390Test{
 
     @Test
     void test_ZPAR() {
-        printOutput = true
         int rc
         rc = asmlg(basePath('demo', 'HELLO'), 'TRACE', *options)
         printOutput()
