@@ -10,7 +10,7 @@ of the actual z390 code. It calls the z390 app via a shell command.
 The idea is that you can run z390 with input and then check the output 
 from the process.
 
-## Setup
+## Prerequisites
 
 You will need a Java SDK installed - version 8 or above.
 
@@ -19,19 +19,19 @@ You will need the z390 source repository cloned to your local system.
     git clone https://github.com/z390development/z390.git
     cd z390
 
-Build the z390 Java jar file for use by the tests. From the z390 root:
+Build the z390 Java jar and libraries for use by the tests. From the z390 root:
 
-    bash/bldjar
-    win> bat\BLDJAR.BAT
+    ./build.sh
+    win> BUILD.BAT
 
-Some tests will require the linklib programs assembled
+## Setup
 
-    bash/bldlib
-    win> bat\BLDLIB.BAT
+Clone this repository
 
-## Run the tests
+    git clone https://github.com/adelosa/z390test.git
 
-Set the Z390_SOURCE_ROOT environment variable so the tests can find the Z390.jar and source.
+Set the Z390_SOURCE_ROOT environment variable to the folder where you have cloned and
+built the z390 so the test suite can execute the tests.
 
     export Z390_SOURCE_ROOT /loc/of/z390
     win> SET Z390_SOURCE_ROOT=c:\loc\of\z390
@@ -42,15 +42,23 @@ While developing tests, it is useful to see this output.
     export Z390_PRINT_OUTPUT 1
     win> SET Z390_PRINT_OUTPUT=1
 
-Now run the tests from this directory
+## Run 
+
+Run the tests from z390test clone directory
 
     ./gradlew test
     win> gradlew test
 
+If you use an IDE like IntelliJ or Eclipse, they have support for Gradle test suites.
+
+https://www.jetbrains.com/help/idea/work-with-tests-in-gradle.html
+
+
     
 ## Writing test cases
 
-The following is a basic test case that executes an assembly of a module and checks the return code.
+The following is a basic test case that executes an assembly of a module in the z390 codebase 
+and checks the return code.
 
 ```groovy
 import org.junit.jupiter.api.Test
@@ -75,7 +83,7 @@ The tests use standard JUnit test structures.
 
 ## Methods for testing
 
-The class embeds a number of methods for interacting with z390 similar
+The z390Test class embeds a number of methods for interacting with z390 similar
 to the scripts you would use.
 
 ### assemble from file
@@ -126,10 +134,10 @@ used in the assembly.
 ```groovy
 this.env = ['SNAPOUT': basePath('zopcheck', 'SNAPOUT.TXT')]
 ```
-The env class property can be set with a hashlist of environment variable that will be passed
+The env property can be set with a hashlist of environment variable that will be passed
 to the z390 calls.
 
-To just add a single envvar without replacing the existing
+To just add a single envvar without replacing the existing:
 ```groovy
 this.env.put('SNAPOUT', basePath('zopcheck', 'SNAPOUT.TXT'))
 ```
