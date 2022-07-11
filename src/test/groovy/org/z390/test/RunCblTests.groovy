@@ -1,66 +1,29 @@
 package org.z390.test
 
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
+
+import static org.junit.jupiter.api.DynamicTest.dynamicTest
 
 class RunCblTests extends z390Test{
-    RunCblTests() {
-        printOutput = true
-    }
 
-    @Test
-    void test_COBOL_TESTADD1() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTADD1"))
+    void test_cobol_module(String moduleName) {
+        int rc = this.cblclg(basePath("zcobol", "tests", moduleName))
         this.printOutput()
         assert rc == 0
     }
 
-    @Test
-    void test_COBOL_TESTADD2() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTADD2"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTIF1() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTIF1"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTIF2() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTIF2"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTIF3() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTIF3"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTMOV1() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTMOV1"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTMOV2() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTMOV2"))
-        this.printOutput()
-        assert rc == 0
-    }
-
-    @Test
-    void test_COBOL_TESTMOV3() {
-        int rc = this.cblclg(basePath("zcobol", "tests", "TESTMOV3"))
-        this.printOutput()
-        assert rc == 0
+    @TestFactory
+    Collection<DynamicTest> test_COBOL() {
+        var tests = []
+        var modules = [
+                'TESTADD1', 'TESTADD2', 'TESTIF1', 'TESTIF2', 'TESTIF3', 'TESTMOV1', 'TESTMOV2', 'TESTMOV3'
+        ]
+        modules.each {
+            module -> tests.add(
+                    dynamicTest("test COBOL ${module}", () -> test_cobol_module(module)))
+        }
+        return tests
     }
 
 }

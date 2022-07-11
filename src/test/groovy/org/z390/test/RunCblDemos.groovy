@@ -35,7 +35,7 @@ class RunCblDemos extends z390Test {
 
         // update the bat/bash file locations in source
         String fileOld = Pattern.quote("ASSIGN TO 'zcobol\\demo\\COPYFILE")
-        var fileNew = "ASSIGN TO '${basePathRelative('zcobol','demo', 'COPYFILE')}"
+        var fileNew = "ASSIGN TO '${basePathRelative('zcobol','demo', 'COPYFILE')}".replaceAll("[\\W|_]", /\\$0/)
         source = source.replaceAll(fileOld, fileNew)
 
         // Create temp source file containing updated file locations
